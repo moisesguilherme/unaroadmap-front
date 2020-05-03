@@ -10,7 +10,7 @@ const headerProps = {
 //local - http://localhost:3000/users/
 const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
-    user: { name: '', email: ''},
+    user: { status: '', email: '', password:'123', profile:'Candidato'},
     list: []
 }
 
@@ -35,7 +35,7 @@ export default class UserCrud extends Component {
         const url = user.id ? `${baseUrl}/${user.id}` : baseUrl
         axios[method](url, user)
             .then(resp => {
-                const list = this.getUpdatedList(resp.data)
+                const list = this.getUpdatedList(resp.data, false)
                 this.setState({ user: initialState.user, list})
             })
     }
@@ -60,15 +60,15 @@ export default class UserCrud extends Component {
                 <div className="row">
                     <div className="col-12 col md-6">
                         <div className="form-group">
-                            <label>Nome</label>   
+                            <label>Status</label>   
                             <input type="text" className="form-control"
-                                name="name" 
-                                value={this.state.user.name}
+                                name="status" 
+                                value="Active"
                                 onChange={e => this.updateField(e)}
-                                placeholder="Digite o nome.." />
+                                placeholder="Digite o status.." />
                         </div>                        
                     </div>
-
+                
                     <div className="col-12 col-md-6">
                         <div className="form-group">
                             <label>E-mail</label>
@@ -80,9 +80,24 @@ export default class UserCrud extends Component {
                             />
 
                         </div>
-                    </div>
+                    </div> 
+
+                    <div className="col-12 col-md-6">
+                        <div className="form-group">
+                            <label>Password</label>
+                            <input type="text" className="form-control"
+                                name="password"
+                                type="password"
+                                value={this.state.user.password}
+                                onChange={e => this.updateField(e)}
+                                placeholder="Digite o password...."
+                            />
+
+                        </div>
+                    </div>                 
                 </div>
 
+         
                 <hr />
                 <div className="row">
                       <div className="col-12 d-flex justify-content-end">
@@ -107,10 +122,16 @@ export default class UserCrud extends Component {
     }
     
     remove(user) {
-        axios.delete(`${baseUrl}/${user.id}`).then(resp => {
+        /*axios.delete(`${baseUrl}/${user.id}`).then(resp => {
             const list = this.getUpdatedList(user, false)
             this.setState({ list })
-        })
+        })*/
+        user.status = "Inactive";
+        axios['put'](`${baseUrl}/${user.id}`, user)
+            .then(resp => {
+                const list = this.getUpdatedList(user, false)
+                this.setState({ user: initialState.user, list})
+            })
     }
 
     renderTable() {
@@ -119,7 +140,7 @@ export default class UserCrud extends Component {
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Nome</th>
+                        <th>Status</th>
                         <th>E-mail</th>
                         <th>Ações</th>
                     </tr>
@@ -136,7 +157,7 @@ export default class UserCrud extends Component {
             return (
                 <tr key={user.id}>
                     <td>{user.id}</td>
-                    <td>{user.name}</td>
+                    <td>{user.status}</td>
                     <td>{user.email}</td>
                     <td>
                         <button className="bt bt-warning"
