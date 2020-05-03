@@ -4,7 +4,7 @@ import Main from '../template/Main'
 
 const headerProps = {
     icon: 'users',
-    title: 'Usuários 0.0.1',
+    title: 'Usuários 0.0.2',
     subtitle: 'Cadastro de usuários: Incluir, Listar, Alterar e Excluir!'
 }
 //local - http://localhost:3000/users/
