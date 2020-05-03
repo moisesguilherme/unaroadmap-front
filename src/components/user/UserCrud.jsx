@@ -8,7 +8,7 @@ const headerProps = {
     subtitle: 'Cadastro de usuários: Incluir, Listar, Alterar e Excluir!'
 }
 //local - http://localhost:3000/users/
-const baseUrl = 'https://unaroadmap-api.herokuapp.com/users/'
+const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
     user: { name: '', email: ''},
     list: []
