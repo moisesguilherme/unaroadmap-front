@@ -1,21 +1,23 @@
 import React, { Component } from 'react'
 import axios from 'axios' //fetch
 import Main from '../template/Main'
+//import UserList from './UserList'
 
 const headerProps = {
     icon: 'users',
-    title: 'Usuários 0.0.2',
+    title: 'Usuários 0.0.3',
     subtitle: 'Cadastro de usuários: Incluir, Listar, Alterar e Excluir!'
 }
-//local - http://localhost:3000/users/
+//local - 
+//const baseUrl = 'http://localhost:3000/users'
 const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
-    user: { status: '', email: '', password:'123', profile:'Candidato'},
+    user: { status: 'Active', email: '', password:'123', profile:'Candidato'},
     list: []
 }
 
 export default class UserCrud extends Component {
-
+    
     state = { ...initialState }
     
     componentWillMount() {
@@ -28,22 +30,48 @@ export default class UserCrud extends Component {
         this.setState({ user: initialState.user })
     }
 
-    save() {
+    // TODO: Refatorar o insert e update aqui
+    // save() {
+    //     const user = this.state.user
+    //     // Se tiver um id (true) vai fazer um put, se não tiver id vai incluir (post)
+    //     const method = user.id ? 'put' : 'post'
+    //     const url = user.id ? `${baseUrl}/${user.id}` : baseUrl
+            
+    //     axios[method](url, user)
+    //         .then(resp => {
+    //             const list = this.getUpdatedList(user, false)
+    //             this.setState({ user: initialState.user, list})
+    //         })
+    // }
+
+    insert(){
         const user = this.state.user
-        // Se tiver um id (true) vai fazer um put, se não tiver id vai incluir (post)
-        const method = user.id ? 'put' : 'post'
-        const url = user.id ? `${baseUrl}/${user.id}` : baseUrl
-        axios[method](url, user)
+                    
+        axios['post'](baseUrl, user)
             .then(resp => {
-                const list = this.getUpdatedList(resp.data, false)
+                const list = this.getUpdatedList(resp.data, true)
+                this.setState({ user: initialState.user, list})
+            })
+
+    }
+
+    update(){
+        const user = this.state.user
+        const url =  `${baseUrl}/${user.id}`
+            
+        axios['put'](url, user)
+            .then(resp => {
+                const list = this.getUpdatedList(user, true)
                 this.setState({ user: initialState.user, list})
             })
     }
 
     getUpdatedList(user, add = true) {
         // Gera uma lista sem o usuário que está adicionando
+        console.log(">>>",  user.id)
         const list = this.state.list.filter(u => u.id !== user.id)
         // Adiciona o usuário no primeiro elemento da lista
+        
         if(add) list.unshift(user)
         return list 
     }
@@ -63,7 +91,7 @@ export default class UserCrud extends Component {
                             <label>Status</label>   
                             <input type="text" className="form-control"
                                 name="status" 
-                                value="Active"
+                                value={this.state.user.status}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o status.." />
                         </div>                        
@@ -87,7 +115,6 @@ export default class UserCrud extends Component {
                             <label>Password</label>
                             <input type="text" className="form-control"
                                 name="password"
-                                type="password"
                                 value={this.state.user.password}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o password...."
@@ -101,8 +128,12 @@ export default class UserCrud extends Component {
                 <hr />
                 <div className="row">
                       <div className="col-12 d-flex justify-content-end">
+                        <button className="btn btn-primary"
+                            onClick={e => this.insert(e)}>
+                              Adicionar
+                          </button>
                           <button className="btn btn-primary"
-                            onClick={e => this.save(e)}>
+                            onClick={e => this.update(e)}>
                               Salvar
                           </button>
                           <button className="btn btn-secondary ml-2"
