@@ -24,12 +24,11 @@ export default class UserCrud extends Component {
 
     state = { ...initialState }
 
-    componentWillMount() {
-
+     componentDidMount() {
         axios(baseUrl).then(resp => {
             this.setState({ list: resp.data })
         })
-    }
+     }
 
     activeButtons(btnAdicionar=true, btnSalvar=false){
         // O padrão é somente o btn adicionar ativo.
@@ -133,7 +132,7 @@ export default class UserCrud extends Component {
                     <div className="col-12 col-md-6">
                         <div className="form-group">
                             <label>Password</label>
-                            <input type="text" className="form-control"
+                            <input className="form-control"
                                 name="password"
                                 type="password"
                                 value={this.state.user.password}
@@ -158,7 +157,7 @@ export default class UserCrud extends Component {
 
                     <div className="col-12 col-md-6">
                         <div className="form-group">
-                            <label>Status</label>
+                            <label>Profile</label>
                             <select name="profile" className="form-control" value={this.state._selectProfile} onChange={e => this.handleChange(e)}>
                                 <option value="Candidato">Candidato</option>
                                 <option value="Empresa">Empresa</option>
@@ -240,11 +239,11 @@ export default class UserCrud extends Component {
                             onClick={() => this.load(user)}>
                             <i className="fa fa-pencil"></i>
                         </button>
-                        <buttom className="btn btn-danger ml-2"
+                        <button className="btn btn-danger ml-2"
                             onClick={() => this.remove(user)}
                         >
                             <i className="fa fa-trash"></i>
-                        </buttom>
+                        </button>
                     </td>
                 </tr>
             )
