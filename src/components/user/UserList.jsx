@@ -8,8 +8,8 @@ import axios from 'axios' //fetch
 //     subtitle: 'Lista todos os usuário do sistema'
 // }
 //local - 
-const baseUrl = 'http://localhost:3000/users'
-//const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
+//const baseUrl = 'http://localhost:3000/users'
+const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
     user: { status: 'Active', email: '', password:'123', profile:'Candidato'},
     list: []

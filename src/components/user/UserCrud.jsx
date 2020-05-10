@@ -1,19 +1,21 @@
 import React, { Component } from 'react'
 import axios from 'axios' //fetch
 import Main from '../template/Main'
-//import UserList from './UserList'
 
 const headerProps = {
     icon: 'users',
     title: 'Usuários 0.0.3',
     subtitle: 'Cadastro de usuários: Incluir, Listar, Alterar e Excluir!'
 }
+
 //local - 
 //const baseUrl = 'http://localhost:3000/users'
 const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
     user: { status: 'Active', email: '', password:'123', profile:'Candidato'},
-    list: []
+    list: [],
+    selectProfile: "Candidato",
+    selectStatus: "Active"
 }
 
 export default class UserCrud extends Component {
@@ -30,20 +32,6 @@ export default class UserCrud extends Component {
         this.setState({ user: initialState.user })
     }
 
-    // TODO: Refatorar o insert e update aqui
-    // save() {
-    //     const user = this.state.user
-    //     // Se tiver um id (true) vai fazer um put, se não tiver id vai incluir (post)
-    //     const method = user.id ? 'put' : 'post'
-    //     const url = user.id ? `${baseUrl}/${user.id}` : baseUrl
-            
-    //     axios[method](url, user)
-    //         .then(resp => {
-    //             const list = this.getUpdatedList(user, false)
-    //             this.setState({ user: initialState.user, list})
-    //         })
-    // }
-
     insert(){
         const user = this.state.user
                     
@@ -57,11 +45,23 @@ export default class UserCrud extends Component {
 
     update(){
         const user = this.state.user
+        //Arrumar
+        user.profile = this.state.selectProfile;
+
         const url =  `${baseUrl}/${user.id}`
             
         axios['put'](url, user)
             .then(resp => {
                 const list = this.getUpdatedList(user, true)
+                this.setState({ user: initialState.user, list})
+            })
+    }
+
+    remove(user) {
+        user.status = "Deleted";
+        axios['put'](`${baseUrl}/${user.id}`, user)
+            .then(resp => {
+                const list = this.getUpdatedList(user, false)
                 this.setState({ user: initialState.user, list})
             })
     }
@@ -80,6 +80,10 @@ export default class UserCrud extends Component {
         const user = { ...this.state.user }
         user[event.target.name] = event.target.value
         this.setState({ user })
+    }
+
+    handleChange(event){
+        this.setState({selectProfile: event.target.value})
     }
 
     renderForm() {
@@ -123,7 +127,20 @@ export default class UserCrud extends Component {
                         </div>
                     </div>                 
                 </div>
-
+                <div className="row">
+                <div className="col-12 col md-6">
+                    <div className="form-group">
+                        <label>
+                            Profile 
+                        </label>
+                            <select value={this.state.selectProfile} onChange={e => this.handleChange(e)}>
+                                <option value="Candidato">Candidato</option>
+                                <option value="Empresa">Empresa</option>
+                                <option value="Administrador">Administrador</option>
+                            </select>
+                    </div>
+                </div>
+                </div>
          
                 <hr />
                 <div className="row">
@@ -149,21 +166,9 @@ export default class UserCrud extends Component {
 
     
     load(user) {
-        this.setState({ user })
+        this.setState({user, selectProfile:user.profile})
     }
     
-    remove(user) {
-        /*axios.delete(`${baseUrl}/${user.id}`).then(resp => {
-            const list = this.getUpdatedList(user, false)
-            this.setState({ list })
-        })*/
-        user.status = "Inactive";
-        axios['put'](`${baseUrl}/${user.id}`, user)
-            .then(resp => {
-                const list = this.getUpdatedList(user, false)
-                this.setState({ user: initialState.user, list})
-            })
-    }
 
     renderTable() {
         return (
@@ -173,6 +178,7 @@ export default class UserCrud extends Component {
                         <th>ID</th>
                         <th>Status</th>
                         <th>E-mail</th>
+                        <th>Profile</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -190,6 +196,7 @@ export default class UserCrud extends Component {
                     <td>{user.id}</td>
                     <td>{user.status}</td>
                     <td>{user.email}</td>
+                    <td>{user.profile}</td>
                     <td>
                         <button className="bt bt-warning"
                             onClick={() => this.load(user)}>
