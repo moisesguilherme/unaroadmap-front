@@ -4,7 +4,7 @@ import Main from '../template/Main'
 
 const headerProps = {
     icon: 'users',
-    title: 'Usuários 0.0.3',
+    title: 'Usuários 0.0.4',
     subtitle: 'Cadastro de usuários: Incluir, Listar, Alterar e Excluir!'
 }
 
@@ -12,68 +12,89 @@ const headerProps = {
 //const baseUrl = 'http://localhost:3000/users'
 const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
-    user: { status: 'Active', email: '', password:'123', profile:'Candidato'},
+    user: { status: 'Active', email: '', password: '123', profile: 'Candidato' },
     list: [],
-    selectProfile: "Candidato",
-    selectStatus: "Active"
+    _selectProfile: "Candidato",
+    _selectStatus: "Active",
+    _btnAdicionarActive: true, //TODO: Refatorar a exibição dos btns
+    _btnSalvarActive: false
 }
 
 export default class UserCrud extends Component {
-    
+
     state = { ...initialState }
-    
+
     componentWillMount() {
+
         axios(baseUrl).then(resp => {
             this.setState({ list: resp.data })
         })
     }
 
-    clear() {
-        this.setState({ user: initialState.user })
+    activeButtons(btnAdicionar=true, btnSalvar=false){
+        // O padrão é somente o btn adicionar ativo.
+        this.setState({
+                _btnAdicionarActive: btnAdicionar, 
+                _btnSalvarActive: btnSalvar
+        })
     }
 
-    insert(){
+    clear() {
+        this.setState({
+            user: initialState.user,
+        })
+
+        this.activeButtons()
+    }
+
+    insert() {
         const user = this.state.user
-                    
+
         axios['post'](baseUrl, user)
             .then(resp => {
                 const list = this.getUpdatedList(resp.data, true)
-                this.setState({ user: initialState.user, list})
+                this.setState({user: initialState.user, list})
             })
 
+            this.activeButtons()
     }
 
-    update(){
+    update() {
         const user = this.state.user
         //Arrumar
-        user.profile = this.state.selectProfile;
+        user.profile = this.state._selectProfile;
+        user.status = this.state._selectStatus;
 
-        const url =  `${baseUrl}/${user.id}`
-            
+        const url = `${baseUrl}/${user.id}`
+
         axios['put'](url, user)
             .then(resp => {
                 const list = this.getUpdatedList(user, true)
-                this.setState({ user: initialState.user, list})
+                this.setState({user: initialState.user, list})
             })
+
+        this.activeButtons()
     }
 
     remove(user) {
         user.status = "Deleted";
         axios['put'](`${baseUrl}/${user.id}`, user)
             .then(resp => {
-                const list = this.getUpdatedList(user, false)
-                this.setState({ user: initialState.user, list})
+                //const list = this.getUpdatedList(user, false)
+                const list = this.state.list
+                this.setState({user: initialState.user, list})
             })
+
+        this.activeButtons()
     }
 
     getUpdatedList(user, add = true) {
         // Gera uma lista sem o usuário que está adicionando
-        console.log(">>>",  user.id)
         const list = this.state.list.filter(u => u.id !== user.id)
         // Adiciona o usuário no primeiro elemento da lista
-        
-        if(add) list.unshift(user)
-        return list 
+
+        if (add) list.unshift(user)
+        return list
     }
 
     updateField(event) {
@@ -82,25 +103,20 @@ export default class UserCrud extends Component {
         this.setState({ user })
     }
 
-    handleChange(event){
-        this.setState({selectProfile: event.target.value})
+    handleChange(event) {
+
+        if (event.target.name === 'profile')
+            this.setState({ _selectProfile: event.target.value })
+
+        if (event.target.name === 'status')
+            this.setState({ _selectStatus: event.target.value })
     }
 
     renderForm() {
         return (
             <div className="form">
                 <div className="row">
-                    <div className="col-12 col md-6">
-                        <div className="form-group">
-                            <label>Status</label>   
-                            <input type="text" className="form-control"
-                                name="status" 
-                                value={this.state.user.status}
-                                onChange={e => this.updateField(e)}
-                                placeholder="Digite o status.." />
-                        </div>                        
-                    </div>
-                
+
                     <div className="col-12 col-md-6">
                         <div className="form-group">
                             <label>E-mail</label>
@@ -112,63 +128,85 @@ export default class UserCrud extends Component {
                             />
 
                         </div>
-                    </div> 
+                    </div>
 
                     <div className="col-12 col-md-6">
                         <div className="form-group">
                             <label>Password</label>
                             <input type="text" className="form-control"
                                 name="password"
+                                type="password"
                                 value={this.state.user.password}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o password...."
                             />
-
                         </div>
-                    </div>                 
+                    </div>
                 </div>
+
                 <div className="row">
-                <div className="col-12 col md-6">
-                    <div className="form-group">
-                        <label>
-                            Profile 
-                        </label>
-                            <select value={this.state.selectProfile} onChange={e => this.handleChange(e)}>
+                    <div className="col-12 col-md-6">
+                        <div className="form-group">
+                            <label>Status</label>
+                            <select name="status" className="form-control" value={this.state._selectStatus} onChange={e => this.handleChange(e)}>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Active">Active</option>
+                                <option value="Deleted">Deleted</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="col-12 col-md-6">
+                        <div className="form-group">
+                            <label>Status</label>
+                            <select name="profile" className="form-control" value={this.state._selectProfile} onChange={e => this.handleChange(e)}>
                                 <option value="Candidato">Candidato</option>
                                 <option value="Empresa">Empresa</option>
                                 <option value="Administrador">Administrador</option>
                             </select>
+                        </div>
                     </div>
+                    
                 </div>
-                </div>
-         
+
                 <hr />
                 <div className="row">
-                      <div className="col-12 d-flex justify-content-end">
+                    <div className="col-12 d-flex justify-content-end">
                         <button className="btn btn-primary"
-                            onClick={e => this.insert(e)}>
-                              Adicionar
+                            onClick={e => this.insert(e)}
+                            style={{ display: this.state._btnAdicionarActive ? 'inline' : 'none' }}
+                        >
+                            Adicionar
                           </button>
-                          <button className="btn btn-primary"
-                            onClick={e => this.update(e)}>
-                              Salvar
+                        <button className="btn btn-primary"
+                            onClick={e => this.update(e)}
+                            style={{ display: this.state._btnSalvarActive ? 'inline' : 'none' }}
+                        >
+                            Salvar
                           </button>
-                          <button className="btn btn-secondary ml-2"
-                             onClick={e => this.clear(e)}>
-                              {/* melhorar-colocar como this.clear */}
+                        <button className="btn btn-secondary ml-2"
+                            onClick={e => this.clear(e)}>
+                            {/* melhorar-colocar como this.clear */}
                               Cancelar
                           </button>
-                      </div>
+                    </div>
                 </div>
             </div>
         )
     }
 
-    
+
     load(user) {
-        this.setState({user, selectProfile:user.profile})
+        this.setState({
+            user,
+            _selectProfile: user.profile,
+            _selectStatus: user.status
+        })
+
+        //Ativa o btn salvar
+        this.activeButtons(false, true)
     }
-    
+
 
     renderTable() {
         return (
@@ -188,7 +226,7 @@ export default class UserCrud extends Component {
             </table>
         )
     }
-    
+
     renderRows() {
         return this.state.list.map(user => {
             return (
@@ -198,7 +236,7 @@ export default class UserCrud extends Component {
                     <td>{user.email}</td>
                     <td>{user.profile}</td>
                     <td>
-                        <button className="bt bt-warning"
+                        <button className="bt btn-warning"
                             onClick={() => this.load(user)}>
                             <i className="fa fa-pencil"></i>
                         </button>
@@ -212,7 +250,7 @@ export default class UserCrud extends Component {
             )
         })
     }
-    
+
     render() {
         //console.log(this.state.list)
         return (
@@ -220,6 +258,6 @@ export default class UserCrud extends Component {
                 {this.renderForm()}
                 {this.renderTable()}
             </Main>
-        )      
+        )
     }
 }
