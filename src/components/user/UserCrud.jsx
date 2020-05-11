@@ -12,7 +12,7 @@ const headerProps = {
 //const baseUrl = 'http://localhost:3000/users'
 const baseUrl = 'https://unaroadmap-api.herokuapp.com/users'
 const initialState = {
-    user: { status: 'Active', email: '', password: '123', profile: 'Candidato' },
+    user: { status: 'Active', email: '', password: '', profile: 'Candidato' },
     list: [],
     _selectProfile: "Candidato",
     _selectStatus: "Active",
@@ -195,17 +195,17 @@ export default class UserCrud extends Component {
     }
 
 
-    load(user) {
-        this.setState({
-            user,
-            _selectProfile: user.profile,
-            _selectStatus: user.status
-        })
+    load(user) {       
+        //Não carrega o password
+        user.password = ''
+        if(user.profile == null) user.profile = ""
+        if(user.status == null) user.status = ""
+        
+        this.setState({ user })
 
         //Ativa o btn salvar
         this.activeButtons(false, true)
     }
-
 
     renderTable() {
         return (

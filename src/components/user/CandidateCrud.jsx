@@ -362,26 +362,24 @@ export default class CandidateCrud extends Component {
         )
     }
 
-    loadUserId(user_id){      
-        
-    }
-
-    async load(user) {
+ 
+    async load(candidate) {
         //carregar usuário pelo user_id
-        //loadUserId(user.user_id)
-        let carregaUser
-        const user_id = user.user_id
+        const user_id = candidate.user_id
         console.log(">>> carregando user_id", user_id)
+
+        // Trata erro da data.
+        if(candidate.birthday == null) candidate.birthday = '1990-01-01'
+        candidate.birthday = candidate.birthday.toString().substr(0,10)
+                
         await axios['get'](`${baseUrl}users/${user_id}`)
         .then(resp => {
             //
-            carregaUser = resp.data
-            carregaUser.password = ""
+            let carregaUser = resp.data
+            carregaUser.password = "" //Tira o password
             //const list = this.getUpdatedList(resp.data, true)
-            this.setState({ user: carregaUser, candidate: user})
+            this.setState({ user: carregaUser, candidate: candidate})
         })
-        
-        console.log(">>> usuário carregado", carregaUser) 
        
         /* this.setState({
             user,
