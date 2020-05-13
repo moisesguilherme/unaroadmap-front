@@ -6,7 +6,6 @@ import UserCrud from '../components/user/UserCrud'
 import UserList from '../components/user/UserList'
 import CanditateCrud from '../components/user/CandidateCrud'
 
-
 export default props => 
     <Switch>
         <Route exact path='/' component={Home} />

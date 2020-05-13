@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import axios from 'axios' //fetch
 import Main from '../template/Main'
+import ModalDeletar from './ModalDeletar'
 
 
 const headerProps = {
     icon: 'users',
-    title: 'Inserir Candidato 0.0.1',
+    title: 'Inserir Candidato 0.0.2',
     subtitle: 'Cadastro de candidato: Incluir, Listar, Alterar e Excluir!'
 }
 
@@ -14,14 +15,14 @@ const headerProps = {
 //const baseUrl = 'http://localhost:3000/candidates'
 const baseUrl = 'https://unaroadmap-api.herokuapp.com/'
 const initialState = {
-    user: {
+    data: {
+        id: '',
         status: 'Active',
         email: '',
         password: '',
         profile: 'Candidato',
-    },
-    candidate: {
-        name: '',
+        user_id:'',
+        name:'',
         birthday: '1990-01-01',
         sexo: '',
         schooling: '',
@@ -35,12 +36,19 @@ const initialState = {
     _selectProfile: "Candidato",
     _selectStatus: "Active",
     _btnAdicionarActive: true, //TODO: Refatorar a exibição dos btns
-    _btnSalvarActive: false
+    _btnSalvarActive: false,
+    show:false
 }
 
 export default class CandidateCrud extends Component {
 
     state = { ...initialState }
+
+    showModal = e => {
+        this.setState({show: !this.state.show})
+    }
+
+
 
     componentDidMount() {
 
@@ -59,71 +67,98 @@ export default class CandidateCrud extends Component {
 
     clear() {
         this.setState({
-            user: initialState.user,
-            canditate: initialState.candidate
+            data: initialState.data,
         })
 
         this.activeButtons()
     }
 
-    async insert() {
-        const user = {
-            status: this.state.user.status,
-            email: this.state.user.email,
-            password: this.state.user.password,
-            profile: this.state.user.profile
+    getUser(){
+        const user ={
+            id: this.state.data.id,
+            email: this.state.data.email,
+            password: this.state.data.password,
+            profile: this.state.data.profile,
         }
+
+        return user;
+    }
+
+    getCandidate(){
+
         const candidate = {
-            name: this.state.candidate.name,
-            birthday: this.state.candidate.birthday,
-            sexo: this.state.candidate.sexo,
-            schooling: this.state.candidate.schooling,  
-            nationality: this.state.candidate.nationality,
-            mother_name: this.state.candidate.mother_name,
-            father_name: this.state.candidate.father_name,
-            telephone: this.state.candidate.telephone,
-            cell_phone: this.state.candidate.cell_phone,
-            user_id: ''
+            id: this.state.data.id,
+            user_id: this.state.data.user_id,
+            name: this.state.data.name,
+            birthday: this.state.data.birthday,
+            sexo: this.state.data.sexo,
+            schooling: this.state.data.schooling,  
+            nationality: this.state.data.nationality,
+            mother_name: this.state.data.mother_name,
+            father_name: this.state.data.father_name,
+            telephone: this.state.data.telephone,
+            cell_phone: this.state.data.cell_phone
         }
+
+        return candidate
+
+    }
+
+
+    async insert() {
+        const user = this.getUser()
+        const candidate = this.getCandidate()
        
        //Inserir o usuário
-       //Pegar o id do usuário
        await axios['post'](baseUrl + 'users', user)
         .then(resp => {
-            //const list = this.getUpdatedList(resp.data, true)
-            //this.setState({ user: initialState.user, list })
+            //Pegar o id do usuário
             candidate.user_id = resp.data.id;           
         })
 
-       //Inserir na tabela candidatos
+       //Inserir o candidato
        await axios['post'](baseUrl + 'candidates', candidate)
         .then(resp => {
             const list = this.getUpdatedList(resp.data, true)
-            this.setState({ user: initialState.user, list })
+            this.setState({ data: initialState.data, list })
         })
 
         this.activeButtons()
     }
 
-    update() {
-        const user = this.state.user
-        //Arrumar
+
+    async update() {
+        const user = this.getUser()
+        const candidate = this.getCandidate()
+        const user_id = candidate.user_id
+
         user.profile = this.state._selectProfile;
         user.status = this.state._selectStatus;
-
-        const url = `${baseUrl}/${user.id}`
-
-        axios['put'](url, user)
+        
+        //Altera o que for relativo ao usuário na tabela users
+        await axios['put'](baseUrl + "users/" + user_id , user)
             .then(resp => {
-                const list = this.getUpdatedList(user, true)
-                this.setState({ user: initialState.user, list })
+                //do Nothing
             })
 
+        
+        //Altera o que for relativo ao candidato
+        await axios['put'](baseUrl + 'candidates/' + candidate.id, candidate)
+        .then(resp => {          
+            const list = this.getUpdatedList(candidate, true)
+            this.setState({ data: initialState.data, list })
+        })
+  
         this.activeButtons()
     }
 
+
     remove(user) {
         user.status = "Deleted";
+
+        this.showModal()
+
+        /*
         axios['put'](`${baseUrl}/${user.id}`, user)
             .then(resp => {
                 //const list = this.getUpdatedList(user, false)
@@ -132,6 +167,7 @@ export default class CandidateCrud extends Component {
             })
 
         this.activeButtons()
+        */
     }
 
     getUpdatedList(user, add = true) {
@@ -144,11 +180,12 @@ export default class CandidateCrud extends Component {
     }
 
     updateField(event) {
-        const user = { ...this.state.user }
-        user[event.target.name] = event.target.value
-        this.setState({ user })
+        const data = { ...this.state.data }
+        data[event.target.name] = event.target.value
+        this.setState({ data })
     }
 
+  
     handleChange(event) {
 
         if (event.target.name === 'profile')
@@ -168,7 +205,7 @@ export default class CandidateCrud extends Component {
                             <label>E-mail</label>
                             <input type="text" className="form-control"
                                 name="email"
-                                value={this.state.user.email}
+                                value={this.state.data.email}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o email...."
                             />
@@ -182,7 +219,7 @@ export default class CandidateCrud extends Component {
                             <input className="form-control"
                                 name="password"
                                 type="password"
-                                value={this.state.user.password}
+                                value={this.state.data.password}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o password...."
                             />
@@ -219,8 +256,8 @@ export default class CandidateCrud extends Component {
                         <div className="form-group">
                             <label>Nome</label>
                             <input type="text" className="form-control"
-                                name="name"
-                                value={this.state.candidate.name}
+                                name='name'
+                                value={this.state.data.name}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o nome...."
                             />
@@ -234,7 +271,7 @@ export default class CandidateCrud extends Component {
                                 className="form-control"
                                 type="date" 
                                 name="birthday"
-                                value={this.state.candidate.birthday}
+                                value={this.state.data.birthday}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o ano de nascimento...."
                             />
@@ -248,7 +285,7 @@ export default class CandidateCrud extends Component {
                             <label>Sexo</label>
                             <input type="text" className="form-control"
                                 name="sexo"
-                                value={this.state.candidate.sexo}
+                                value={this.state.data.sexo}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o sexo...."
                             />
@@ -260,7 +297,7 @@ export default class CandidateCrud extends Component {
                             <label>Escolaridade</label>
                             <input type="text" className="form-control"
                                 name="schooling"
-                                value={this.state.candidate.schooling}
+                                value={this.state.data.schooling}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o escolaridade...."
                             />
@@ -274,7 +311,7 @@ export default class CandidateCrud extends Component {
                             <label>Nacionalidade</label>
                             <input type="text" className="form-control"
                                 name="nationality"
-                                value={this.state.candidate.nationality}
+                                value={this.state.data.nationality}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o nacionalidade...."
                             />
@@ -286,7 +323,7 @@ export default class CandidateCrud extends Component {
                             <label>Nome da mãe</label>
                             <input type="text" className="form-control"
                                 name="mother_name"
-                                value={this.state.candidate.mother_name}
+                                value={this.state.data.mother_name}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o nome da mãe...."
                             />
@@ -300,7 +337,7 @@ export default class CandidateCrud extends Component {
                             <label>Nome do pai</label>
                             <input type="text" className="form-control"
                                 name="father_name"
-                                value={this.state.candidate.father_name}
+                                value={this.state.data.father_name}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o nome do pai...."
                             />
@@ -312,7 +349,7 @@ export default class CandidateCrud extends Component {
                             <label>Telefone</label>
                             <input type="text" className="form-control"
                                 name="telephone"
-                                value={this.state.candidate.telephone}
+                                value={this.state.data.telephone}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o telefone...."
                             />
@@ -326,7 +363,7 @@ export default class CandidateCrud extends Component {
                             <label>Celular</label>
                             <input type="text" className="form-control"
                                 name="cell_phone"
-                                value={this.state.candidate.cell_phone}
+                                value={this.state.data.cell_phone}
                                 onChange={e => this.updateField(e)}
                                 placeholder="Digite o celular...."
                             />
@@ -356,36 +393,47 @@ export default class CandidateCrud extends Component {
                             {/* melhorar-colocar como this.clear */}
                               Cancelar
                           </button>
+                          <ModalDeletar onClose={this.showModal} show={this.state.show} title="Deletar item"> A opção de deletar ainda não foi implementada! </ModalDeletar> 
                     </div>
                 </div>
+                
             </div>
+
+
         )
     }
 
  
+    
     async load(candidate) {
-        //carregar usuário pelo user_id
-        const user_id = candidate.user_id
-        console.log(">>> carregando user_id", user_id)
+     
+        let copyCandidate = { ...candidate }
+        let user
 
         // Trata erro da data.
-        if(candidate.birthday == null) candidate.birthday = '1990-01-01'
-        candidate.birthday = candidate.birthday.toString().substr(0,10)
+        if(copyCandidate.birthday == null) copyCandidate.birthday = '1990-01-01'
+        copyCandidate.birthday = copyCandidate.birthday.toString().substr(0,10)
                 
-        await axios['get'](`${baseUrl}users/${user_id}`)
+        //Busca o usuário pelo user_id do candidato
+        await axios['get'](`${baseUrl}users/${copyCandidate.user_id}`)
         .then(resp => {
-            //
-            let carregaUser = resp.data
-            carregaUser.password = "" //Tira o password
+            user = resp.data
+            //Precisa limpar o password para não carregar no textinput.
+            user.password = ''
+            //user.password = "" //Tira o password
             //const list = this.getUpdatedList(resp.data, true)
-            this.setState({ user: carregaUser, candidate: candidate})
+            //this.setState({ user: carregaUser, candidate: initialState.candidate})
         })
        
-        /* this.setState({
-            user,
+        const newData = {...user, ...copyCandidate }
+
+        console.log(">>>> carregou, o user_id", newData.user_id)
+
+        this.setState({
+            data: newData,
             _selectProfile: user.profile,
             _selectStatus: user.status
-        })*/
+        })
 
         //Ativa o btn salvar
         this.activeButtons(false, true)
@@ -412,20 +460,20 @@ export default class CandidateCrud extends Component {
     }
 
     renderRows() {
-        return this.state.list.map(user => {
+        return this.state.list.map(candidate => {
             return (
-                <tr key={user.id}>
-                    <td>{user.id}</td>
-                    <td>{user.user_id}</td>
-                    <td>{user.name}</td>
-                    <td>{user.cell_phone}</td>
+                <tr key={candidate.id}>
+                    <td>{candidate.id}</td>
+                    <td>{candidate.user_id}</td>
+                    <td>{candidate.name}</td>
+                    <td>{candidate.cell_phone}</td>
                     <td>
                         <button className="bt btn-warning"
-                            onClick={() => this.load(user)}>
+                            onClick={() => this.load(candidate)}>
                             <i className="fa fa-pencil"></i>
                         </button>
                         <button className="btn btn-danger ml-2"
-                            onClick={() => this.remove(user)}
+                            onClick={() => this.remove(candidate)}
                         >
                             <i className="fa fa-trash"></i>
                         </button>

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import axios from 'axios' //fetch
+import 'bootstrap/dist/css/bootstrap.min.css'
 //import Main from '../template/Main'
 
 // const headerProps = {
@@ -152,6 +153,7 @@ export default class UserList extends Component {
                     {this.renderRows()}
                 </tbody>
             </table>
+
         )
     }
     
