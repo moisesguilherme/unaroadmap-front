@@ -38,12 +38,17 @@ export default class UserCrud extends Component {
         })
     }
 
+    resetSelected(){
+        this.setState({ _selectStatus: "Active", _selectProfile: "Candidato" })
+    }
+
     clear() {
         this.setState({
             user: initialState.user,
         })
 
         this.activeButtons()
+        this.resetSelected()
     }
 
     insert() {
@@ -55,7 +60,8 @@ export default class UserCrud extends Component {
                 this.setState({user: initialState.user, list})
             })
 
-            this.activeButtons()
+        this.activeButtons()
+        this.resetSelected()
     }
 
     update() {
@@ -73,6 +79,7 @@ export default class UserCrud extends Component {
             })
 
         this.activeButtons()
+        this.resetSelected()
     }
 
     remove(user) {
@@ -204,8 +211,11 @@ export default class UserCrud extends Component {
         if(user.profile == null) user.profile = ""
         if(user.status == null) user.status = ""
         
-        this.setState({ user })
-
+        this.setState({ user , 
+                       _selectStatus: user.status,
+                       _selectProfile: user.profile
+                    })
+        
         //Ativa o btn salvar
         this.activeButtons(false, true)
     }
