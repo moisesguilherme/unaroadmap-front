@@ -37,7 +37,8 @@ const initialState = {
     _selectStatus: "Active",
     _btnAdicionarActive: true, //TODO: Refatorar a exibição dos btns
     _btnSalvarActive: false,
-    show:false
+    _showModal:false,
+    _slectedCandidate: null
 }
 
 export default class CandidateCrud extends Component {
@@ -45,10 +46,8 @@ export default class CandidateCrud extends Component {
     state = { ...initialState }
 
     showModal = e => {
-        this.setState({show: !this.state.show})
+        this.setState({_showModal: !this.state._showModal})
     }
-
-
 
     componentDidMount() {
 
@@ -152,30 +151,39 @@ export default class CandidateCrud extends Component {
         this.activeButtons()
     }
 
+    async confirmRemove(){
+        const id = this.state._slectedCandidate.id
+        const user_id = this.state._slectedCandidate.user_id
+        
+        await axios.delete(`${baseUrl}candidates/${id}`).then(resp => {
+            console.log(">>> foi apgagado", resp.data )
+        })
+    
+        const user = {}
+        user.status = "Deleted"
+        user.id = id
 
-    remove(user) {
-        user.status = "Deleted";
-
-        this.showModal()
-
-        /*
-        axios['put'](`${baseUrl}/${user.id}`, user)
+        await axios['put'](`${baseUrl}users/${user_id}`, user)
             .then(resp => {
-                //const list = this.getUpdatedList(user, false)
-                const list = this.state.list
-                this.setState({ user: initialState.user, list })
+                const list = this.getUpdatedList(user, false)
+                this.setState({list})
             })
 
-        this.activeButtons()
-        */
+         this.showModal(); //some o modal
     }
 
-    getUpdatedList(user, add = true) {
+    remove(candidate) {
+        console.log(">>>> remove")
+        this.showModal()
+        this.setState({ _slectedCandidate: candidate} )
+    }
+
+    getUpdatedList(candidate, add = true) {
         // Gera uma lista sem o usuário que está adicionando
-        const list = this.state.list.filter(u => u.id !== user.id)
+        const list = this.state.list.filter(u => u.id !== candidate.id)
         // Adiciona o usuário no primeiro elemento da lista
 
-        if (add) list.unshift(user)
+        if (add) list.unshift(candidate)
         return list
     }
 
@@ -393,7 +401,7 @@ export default class CandidateCrud extends Component {
                             {/* melhorar-colocar como this.clear */}
                               Cancelar
                           </button>
-                          <ModalDeletar onClose={this.showModal} show={this.state.show} title="Deletar item"> A opção de deletar ainda não foi implementada! </ModalDeletar> 
+                          <ModalDeletar onClose={this.showModal} callback={e => this.confirmRemove(e)} show={this.state._showModal} title="Deletar o candidato"> Você tem tem certeza que deseja apagar o candidato?</ModalDeletar> 
                     </div>
                 </div>
                 
