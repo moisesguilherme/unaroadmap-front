@@ -147,7 +147,7 @@ module.exports = {
         historyApiFallback: {
             index: '/'
         },
-        host: '0.0.0.0',
+        host: 'https://unaroadmap.herokuapp.com',
         port: process.env.PORT
     }
 }
