@@ -12,7 +12,7 @@ var config = {
 
     // Source Directory ===============================================
     srcDir:                 path.join(root, 'app'),
-    srcServerDir:           path.join(root, 'app'),
+    srcServerDir:           path.join(root, 'server'),
 
     // HTML Layout ====================================================
     srcHtmlLayout:          path.join(root, 'app', 'index.html'),
