@@ -148,6 +148,6 @@ module.exports = {
             index: '/'
         },
         host: '0.0.0.0',
-        port: 4100
+        port: 80
     }
 }
