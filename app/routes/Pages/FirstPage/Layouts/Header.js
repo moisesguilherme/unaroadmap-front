@@ -63,7 +63,7 @@ export const Header = () => (
           <Row className="text-content">
             <h1 className="title">
               Conquiste o emprego <br></br>
-            dos seus sonhos!
+            dos seus sonhos!!
           </h1>
             <p className="content">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus
