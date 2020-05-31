@@ -13,7 +13,7 @@ var BASE_PATH = process.env.BASE_PATH || '/';
 module.exports = {
     devtool: 'inline-source-map',
     mode: 'production',
-    entry: './app/index.js', // {
+    entry: '../app/index.js', // {
        // app: ['react-hot-loader/patch', path.join(config.srcDir, 'index.js')]
     //},
     output: {
