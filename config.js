@@ -12,7 +12,7 @@ var config = {
 
     // Source Directory ===============================================
     srcDir:                 path.join(root, 'app'),
-    srcServerDir:           path.join(root, 'server'),
+    srcServerDir:           path.join(root, 'app'),
 
     // HTML Layout ====================================================
     srcHtmlLayout:          path.join(root, 'app', 'index.html'),
@@ -20,7 +20,7 @@ var config = {
     // Site Config ====================================================
     siteTitle:              'UnaRoadMap',
     siteDescription:        'Projeto una',
-    siteCannonicalUrl:      'http://localhost:4100',
+    siteCannonicalUrl:      'https://unaroadmap.herokuapp.com',
     siteKeywords:           'Projeto una',
     scssIncludes:           []
 }
